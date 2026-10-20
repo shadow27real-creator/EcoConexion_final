@@ -4,8 +4,16 @@ session_start();
 require_once __DIR__ . '/conexion/conexion.php';
 require_once __DIR__ . '/funciones/funciones.php';
 
+// Verificar autenticación
 if (!estaAutenticado()) {
     header('Location: auth/login.php');
+    exit();
+}
+
+// RESTRICCIÓN DE ROL: Si es un reciclador, se redirige al tablero inmediatamente
+$tipoUsuario = $_SESSION['tipo_usuario'] ?? '';
+if ($tipoUsuario === 'reciclador') {
+    header('Location: tablero.php');
     exit();
 }
 
@@ -108,15 +116,25 @@ require __DIR__ . '/includes/cabecera.php';
                 <p class="form-hint">Incluye barrio o zona para que el reciclador estime el recorrido.</p>
             </div>
 
-            <!-- Área amarilla de referencia / mapa de ubicación -->
-            <div class="auth-demo" style="margin-top: 1rem; border-color: var(--kraft);">
-                <strong>🗺️ Referencia de Zona (Bogotá)</strong>
-                <p style="margin-top: 0.3rem; font-size: 0.88rem;">
-                    Asegúrate de indicar puntos de referencia claros. Esto simula el mapa de ubicación para guiar al reciclador de manera óptima en la zona.
+            <!-- Caja con mapa interactivo de Google Maps -->
+            <div style="margin-top: 1.25rem; background: #fffbe6; border: 2px dashed var(--kraft); padding: 1rem; border-radius: 8px;">
+                <strong style="color: var(--tinta); display: block; margin-bottom: 0.5rem;">🗺️ Referencia de Ubicación (Bogotá)</strong>
+                <div style="width: 100%; height: 200px; border-radius: 6px; overflow: hidden; border: 1px solid var(--linea);">
+                    <iframe 
+                        width="100%" 
+                        height="100%" 
+                        style="border:0;" 
+                        loading="lazy" 
+                        allowfullscreen 
+                        src="https://maps.google.com/maps?q=Bogota%20Colombia&t=&z=13&ie=UTF8&iwloc=&output=embed">
+                    </iframe>
+                </div>
+                <p style="margin-top: 0.5rem; font-size: 0.82rem; color: var(--muted); margin-bottom: 0;">
+                    El mapa guía al reciclador en la zona geográfica de cobertura.
                 </p>
             </div>
 
-            <div class="campo" style="margin-top: 1.15rem;">
+            <div class="campo" style="margin-top: 1.25rem;">
                 <label for="descripcion">Descripción adicional (opcional)</label>
                 <textarea id="descripcion" name="descripcion" rows="3"
                           placeholder="Empaque, horario, instrucciones de portería…"><?= e($valores['descripcion']) ?></textarea>
